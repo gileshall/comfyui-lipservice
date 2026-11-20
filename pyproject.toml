@@ -8,7 +8,7 @@ description = "Lip Service in ComfyUI: voices that say text and sing scores, on 
 license = "AGPL-3.0-only"
 license-files = ["LICENSE"]
 requires-python = ">=3.9"
-dependencies = ["lipservice"]
+dependencies = ["lipservice>0"]
 classifiers = [
   "Operating System :: MacOS",
   "Operating System :: POSIX :: Linux",
