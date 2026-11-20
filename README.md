@@ -6,8 +6,14 @@ that takes audio.
 
 ## Install
 
-Put this folder in ComfyUI's `custom_nodes`, install its one requirement into ComfyUI's Python,
-and restart ComfyUI:
+Search for Lip Service in ComfyUI's Manager, or from the command line:
+
+```bash
+comfy node install comfyui-lipservice
+```
+
+By hand: clone this repository into ComfyUI's `custom_nodes`, install its one requirement into
+ComfyUI's Python, and restart ComfyUI:
 
 ```bash
 pip install -r requirements.txt

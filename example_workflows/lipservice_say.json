@@ -14,7 +14,7 @@
       "mode": 0,
       "inputs": [],
       "outputs": [{"name": "AUDIO", "type": "AUDIO", "links": [1, 2]}],
-      "properties": {"Node name for S&R": "LipServiceSay", "cnr_id": "comfyui-lipservice", "ver": "0.1.0"},
+      "properties": {"Node name for S&R": "LipServiceSay", "cnr_id": "comfyui-lipservice", "ver": "1.0.0"},
       "widgets_values": ["Talk is cheap. Singing is free.", "ada", "hifi", 1.0, 0.0, 0, "fixed", false]
     },
     {
