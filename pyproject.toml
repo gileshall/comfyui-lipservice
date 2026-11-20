@@ -3,12 +3,12 @@
 
 [project]
 name = "comfyui-lipservice"
-version = "1.0.0"
+version = "1.0.1"
 description = "Lip Service in ComfyUI: voices that say text and sing scores, on the CPU, as AUDIO."
 license = "AGPL-3.0-only"
 license-files = ["LICENSE"]
 requires-python = ">=3.9"
-dependencies = ["lipservice==0.1.1"]
+dependencies = ["lipservice"]
 classifiers = [
   "Operating System :: MacOS",
   "Operating System :: POSIX :: Linux",
