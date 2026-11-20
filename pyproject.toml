@@ -20,7 +20,7 @@ Repository = "https://github.com/gileshall/comfyui-lipservice"
 Engine = "https://github.com/gileshall/lipservice"
 
 [tool.comfy]
-PublisherId = ""
+PublisherId = "gileshall"
 DisplayName = "Lip Service"
 Icon = "https://raw.githubusercontent.com/gileshall/lipservice/main/plugin/assets/icon.png"
 includes = []
