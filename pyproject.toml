@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# Copyright (C) 2026 Giles Hall
+
+[project]
+name = "comfyui-lipservice"
+version = "0.1.0"
+description = "Lip Service in ComfyUI: voices that say text and sing scores, on the CPU, as AUDIO."
+license = "AGPL-3.0-only"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+dependencies = ["lipservice==0.1.1"]
+classifiers = [
+  "Operating System :: MacOS",
+  "Operating System :: POSIX :: Linux",
+]
+
+[project.urls]
+Homepage = "https://lipservice.dev"
+Repository = "https://github.com/gileshall/comfyui-lipservice"
+Engine = "https://github.com/gileshall/lipservice"
+
+[tool.comfy]
+PublisherId = ""
+DisplayName = "Lip Service"
+Icon = "https://raw.githubusercontent.com/gileshall/lipservice/main/plugin/assets/icon.png"
+includes = []
+requires-comfyui = ">=0.36.0"
