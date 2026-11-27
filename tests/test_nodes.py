@@ -27,12 +27,17 @@ def inputs(node):
 def package(pack, kw):
     """The node's inputs as the package's arguments."""
     if kw.get("motion") == pack.nodes.NO_MOTION:
-        return {**kw, "motion": None}
+        kw = {**kw, "motion": None}
+    if "tags" in kw:               # names between commas; none is sing's ()
+        kw = {**kw, "tags": tuple(t.strip() for t in kw["tags"].split(",") if t.strip())}
+    if kw.get("diction") == "":    # no rules is sing's None
+        kw = {**kw, "diction": None}
     return kw
 
 
 def test_the_nodes(nodes):
-    assert set(nodes) == {"LipServiceSay", "LipServiceSing"}
+    assert set(nodes) == {"LipServiceSay", "LipServiceSing", "LipServiceChoir", "LipServiceLoadChoir", "LipServiceChoirFromText", "LipServiceSinger", "LipServiceChoirFromSingers",
+                          "LipServiceCastPanels", "LipServiceCheckPlate", "LipServiceFrameCount", "LipServiceLayCast"}
 
 
 @pytest.mark.parametrize("node_id, fn", [("LipServiceSay", lipservice.say), ("LipServiceSing", lipservice.sing)])
@@ -50,7 +55,7 @@ def test_every_parameter_in_order_with_its_default(pack, nodes, node_id, fn):
 
 
 def test_choices_from_the_package(pack, nodes):
-    for node in nodes.values():
+    for node in (nodes["LipServiceSay"], nodes["LipServiceSing"]):
         assert inputs(node)["voice"][1]["options"] == [v["name"] for v in lipservice.voices()]
         assert inputs(node)["quality"][1]["options"] == list(lipservice.QUALITIES)
     assert inputs(nodes["LipServiceSing"])["motion"][1]["options"] == [pack.nodes.NO_MOTION, *lipservice.MOTIONS]
@@ -64,11 +69,11 @@ def cases(pack):
         ("LipServiceSay", lipservice.say, dict(text='<speak>Hello <break time="300ms"/> <emphasis level="strong">there</emphasis>.</speak>', voice="opal",
                                                quality="hifi", rate=0.9, shift=1.0, seed=2**32 - 1, ssml=True)),
         ("LipServiceSing", lipservice.sing, dict(song=song, voice="ada", quality="hifi", shift=0.0, seed=0, vibrato=0.25, vibrato_hz=5.5, vibrato_delay=0.25,
-                                                 motion=pack.nodes.NO_MOTION, motion_scale=1.0, glide=9, dynamics=0.0, breathiness=1.0, diction=False)),
+                                                 motion=pack.nodes.NO_MOTION, motion_scale=1.0, glide=9, dynamics=0.0, breathiness=1.0, diction="spoken", tags="")),
         ("LipServiceSing", lipservice.sing, dict(song=song, voice="hal", quality="fast", shift=-12.0, seed=3, vibrato=0.5, vibrato_hz=6.0, vibrato_delay=0.1,
-                                                 motion=pack.nodes.NO_MOTION, motion_scale=1.0, glide=20, dynamics=1.0, breathiness=0.5, diction=True)),
+                                                 motion=pack.nodes.NO_MOTION, motion_scale=1.0, glide=20, dynamics=1.0, breathiness=0.5, diction="", tags="")),
         ("LipServiceSing", lipservice.sing, dict(song=song, voice="cora", quality="hifi", shift=0.0, seed=11, vibrato=0.25, vibrato_hz=5.5, vibrato_delay=0.25,
-                                                 motion="wide", motion_scale=1.5, glide=4, dynamics=0.5, breathiness=1.5, diction=False)),
+                                                 motion="wide", motion_scale=1.5, glide=4, dynamics=0.5, breathiness=1.5, diction="for=lead spoken\nER held>=240 -> AH ~ER", tags="lead, high")),
     ]
 
 

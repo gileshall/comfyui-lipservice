@@ -171,6 +171,8 @@ def made(node):
     i = node["inputs"]
     if i.get("motion") == "none":
         i = {**i, "motion": None}
+    if "tags" in i:
+        i = {**i, "tags": [t.strip() for t in i["tags"].split(",") if t.strip()]}
     return {"LipServiceSay": lipservice.say, "LipServiceSing": lipservice.sing}[node["class_type"]](**i)
 
 
@@ -220,12 +222,20 @@ def main():
             entry = server.run(prompt)
             took = time.monotonic() - t
             assert entry["status"]["status_str"] == "success", json.dumps(entry["status"])
-            want = np.frombuffer(made(prompt["1"]).samples, dtype=np.float32)
             print(f"{name}: success in {took:.1f} s")
-            for k, v in prompt.items():
-                for f in entry["outputs"].get(k, {}).get("audio", []):
+            saved = [(v, f) for k, v in prompt.items() for f in entry["outputs"].get(k, {}).get("audio", [])]
+            assert saved, f"{name}: no audio saved"
+            if prompt["1"]["class_type"] not in ("LipServiceSay", "LipServiceSing"):
+                # a choir is built over several nodes: its samples are held to the package's in tests/test_choir.py; here it has to run and save
+                for v, f in saved:
                     path = os.path.join(base, f["type"], f["subfolder"], f["filename"])
-                    print(f"  {v['class_type']}: {os.path.relpath(path, base)}: {compare(path, want)}")
+                    assert os.path.getsize(path) > 10000, path
+                    print(f"  {v['class_type']}: {os.path.relpath(path, base)}: saved, {os.path.getsize(path)} bytes")
+                continue
+            want = np.frombuffer(made(prompt["1"]).samples, dtype=np.float32)
+            for v, f in saved:
+                path = os.path.join(base, f["type"], f["subfolder"], f["filename"])
+                print(f"  {v['class_type']}: {os.path.relpath(path, base)}: {compare(path, want)}")
         say, sing = prompts["lipservice_say.json"], prompts["lipservice_sing.json"]
 
         bad = copy.deepcopy(say)

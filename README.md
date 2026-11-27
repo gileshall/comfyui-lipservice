@@ -26,7 +26,10 @@ package when ComfyUI starts. macOS and Linux.
 ## Nodes
 
 **Lip Service Say** says text. **Lip Service Sing** sings a score. Each is the package's `say` or
-`sing`, every parameter with its default; hover an input for what it does. The seed stays fixed
+`sing`, every parameter with its default; hover an input for what it does. **Lip Service Choir**
+sings a piece for several voices in stereo, the package's `choir`: one of lipservice.dev's, one
+loaded from a file or typed as JSON, or one built on the canvas from **Lip Service Singer** nodes
+chained left to right into **Lip Service Choir From Singers**. The seed stays fixed
 after a run, so a change is heard on the same take; set its control to `randomize` for a new take
 each run.
 
@@ -38,22 +41,23 @@ engine's own words. The samples are handed on exactly as the package returns the
 A word a line, and a note for each of its syllables:
 
 ```
-bpm 90
+%bpm 90
 amazing D4:1 G4:2 B4:0.5+G4:0.5
 grace B4:2
-rest 1
+%rest 1
 how A4:1
 sweet G4:2
 ```
 
 `NOTE:BEATS` with the note as `C4`, `F#3`, `Bb2` or a MIDI number; `+` joins notes on one
-syllable; `rest BEATS` is silence; `bpm N` is the tempo, once. The whole format is
+syllable; `%rest BEATS` is silence; `%bpm N` is the tempo, once, before the first word. The whole
+format is
 [SCORE.md](https://github.com/gileshall/lipservice/blob/main/SCORE.md).
 
 ## Examples
 
-`example_workflows/` has a say and a sing, each to Preview Audio and Save Audio. ComfyUI lists
-them among its templates.
+`example_workflows/` has a say, a sing and a choir, each saving its audio. ComfyUI lists them
+among its templates.
 
 ## Tests
 
