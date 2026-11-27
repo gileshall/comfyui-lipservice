@@ -23,6 +23,10 @@ The first run fetches the models, about 56 MB for `hifi`, from models.lipservice
 `lipservice` package's own cache (`LIPSERVICE_CACHE` moves it). The voice list is read from the
 package when ComfyUI starts. macOS and Linux.
 
+Coming from `lipservice` 0.1 with its models already fetched: run `lipservice fetch` once with
+ComfyUI's Python before starting ComfyUI. The cache's list of models is older than the choirs, and
+the nodes do not load until it is read again.
+
 ## Nodes
 
 **Lip Service Say** says text. **Lip Service Sing** sings a score. Each is the package's `say` or
