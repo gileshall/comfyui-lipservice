@@ -224,7 +224,7 @@
    "mode": 0,
    "inputs": [
     {
-     "name": "loaded",
+     "name": "piece",
      "type": "LIPSERVICE_PIECE",
      "link": 5
     },
@@ -282,7 +282,6 @@
     "Node name for S&R": "LipServiceChoir"
    },
    "widgets_values": [
-    "Barbershop tag",
     "hifi",
     true,
     0,

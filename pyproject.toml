@@ -3,7 +3,7 @@
 
 [project]
 name = "comfyui-lipservice"
-version = "1.1.0"
+version = "1.2.0"
 description = "Lip Service in ComfyUI: voices that say text and sing scores, on the CPU, as AUDIO."
 license = "AGPL-3.0-only"
 license-files = ["LICENSE"]

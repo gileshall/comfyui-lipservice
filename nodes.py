@@ -174,11 +174,11 @@ class Choir(io.ComfyNode):
             node_id="LipServiceChoir",
             display_name="Lip Service Choir",
             category="audio/Lip Service",
-            description="A piece for several voices, sung as lipservice.dev sings its choirs: each singer a little off the beat and the pitch, breaths in the rests, "
+            description="A piece for several voices: each singer a little off the beat and the pitch, breaths in the rests, "
                         "seated left to right, in a room. Stereo, 24 kHz, made on the CPU.",
             search_aliases=["choir", "chorus", "harmony", "round", "canon", "ensemble", "singers"],
             inputs=[
-                io.Combo.Input("piece", options=lipservice.choirs(), tooltip="One of lipservice.dev's choirs."),
+                Piece.Input("piece", tooltip="A piece from Load Choir, Choir From Text or Choir From Singers."),
                 _quality(CHOIR),
                 io.Boolean.Input("seed_from_piece", default=True, tooltip="The piece's own seed; off, the seed below."),
                 io.Int.Input("seed", default=0, min=0, max=2**32 - 1, control_after_generate=io.ControlAfterGenerate.fixed,
@@ -188,7 +188,6 @@ class Choir(io.ComfyNode):
                                tooltip="Trained singers' pitch motion for every part; none is each singer's plain vibrato."),
                 io.String.Input("voices", multiline=True, default="", placeholder="A voice a line, by part; an empty line keeps the part's own.",
                                 tooltip="Who sings each part, in the piece's order: " + ", ".join(v["name"] for v in lipservice.voices()) + "."),
-                Piece.Input("loaded", optional=True, tooltip="A piece from Load Choir or Choir From Text, sung in place of the one named."),
                 _how("sway", "The pitch's movement, times its own size."),
                 _how("vibrato", "The written vibrato's size, times."),
                 _how("loose", "How far off the beat and the pitch each singer is, times."),
@@ -201,10 +200,10 @@ class Choir(io.ComfyNode):
         )
 
     @classmethod
-    def execute(cls, piece, quality, seed_from_piece, seed, room, motion, voices, loaded=None, **how) -> io.NodeOutput:
+    def execute(cls, piece, quality, seed_from_piece, seed, room, motion, voices, **how) -> io.NodeOutput:
         names = [line.strip() or None for line in voices.split("\n")]
         clip = lipservice.choir(
-            piece if loaded is None else loaded, quality=quality, seed=None if seed_from_piece else seed,
+            piece, quality=quality, seed=None if seed_from_piece else seed,
             room=None if room == OWN else room, motion=None if motion == OWN else motion,
             voices=names if any(names) else None, **{k: v for k, v in how.items() if v is not None})
         return io.NodeOutput(_audio(clip), clip.timing)

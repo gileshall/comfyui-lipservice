@@ -15,7 +15,10 @@ import torch
 
 import lipservice
 
-PIECE = "Barbershop tag"
+HIGH = "%bpm 90\nsing C5:1\nwith B4:1\nme C5:2\n"
+LOW = "%bpm 90\nsing E4:1\nwith G4:1\nme E4:2\n"
+PIECE = {"room": "card", "style": {"glide": 9, "dynamics": 1.0, "breathiness": 0.6},
+         "parts": [{"name": "High", "voice": "cora", "song": HIGH}, {"name": "Low", "voice": "ben", "song": LOW}]}
 
 
 @pytest.fixture(scope="session")
@@ -51,9 +54,9 @@ def same(out, clip):
 def test_every_parameter_of_choir(pack, nodes):
     got = every(nodes["LipServiceChoir"])
     params = inspect.signature(lipservice.choir).parameters
-    # songs come in a loaded piece; seed_from_piece and loaded are the node's own
+    # songs come in the piece; seed_from_piece is the node's own
     assert set(params) - set(got) == {"songs"}
-    assert set(got) - set(params) == {"seed_from_piece", "loaded"}
+    assert set(got) - set(params) == {"seed_from_piece"}
     assert all(p.default is None for n, p in params.items() if n not in ("piece", "quality"))
     assert got["quality"][1]["default"] == params["quality"].default
 
@@ -61,7 +64,7 @@ def test_every_parameter_of_choir(pack, nodes):
 def test_choices_and_ranges_from_the_package(pack, nodes):
     got = every(nodes["LipServiceChoir"])
     own = pack.nodes.OWN
-    assert got["piece"][1]["options"] == lipservice.choirs()
+    assert got["piece"][0] == "LIPSERVICE_PIECE"
     assert got["quality"][1]["options"] == list(lipservice.QUALITIES)
     assert got["room"][1]["options"] == [own, *lipservice.ROOMS] and got["room"][1]["default"] == own
     assert got["motion"][1]["options"] == [own, pack.nodes.NO_MOTION, *lipservice.MOTIONS] and got["motion"][1]["default"] == own
@@ -81,7 +84,7 @@ def test_the_piece_as_it_is(pack, nodes):
 
 
 def test_everything_asked(pack, nodes):
-    out = nodes["LipServiceChoir"].execute(**ask(pack, quality="fast", seed_from_piece=False, seed=5, room="bare", motion=pack.nodes.NO_MOTION, voices="\nleo\n\n",
+    out = nodes["LipServiceChoir"].execute(**ask(pack, quality="fast", seed_from_piece=False, seed=5, room="bare", motion=pack.nodes.NO_MOTION, voices="\nleo",
                                                  sway=0.5, vibrato=1.5, loose=2.0, glide=12, dynamics=0.7, breath=0.2, breathiness=0.6))
     same(out, lipservice.choir(PIECE, quality="fast", seed=5, room="bare", motion="none", voices=[None, "leo"],
                                sway=0.5, vibrato=1.5, loose=2.0, glide=12, dynamics=0.7, breath=0.2, breathiness=0.6))
@@ -103,7 +106,7 @@ def test_a_file_from_the_input_folder(pack, nodes, input_dir):
     assert nodes["LipServiceLoadChoir"].INPUT_TYPES()["required"]["file"][1]["options"] == ["tag.json"]
     loaded = nodes["LipServiceLoadChoir"].execute(file="tag.json").result[0]
     assert loaded == piece()
-    same(nodes["LipServiceChoir"].execute(**ask(pack, piece="Ode to Joy", loaded=loaded)), lipservice.choir(piece()))
+    same(nodes["LipServiceChoir"].execute(**ask(pack, piece=loaded)), lipservice.choir(piece()))
 
 
 @pytest.mark.parametrize("name", ["../outside.json", "/etc/hosts", "sub/../../outside.json"])
@@ -122,7 +125,7 @@ def test_a_link_out_of_the_input_folder_is_refused(nodes, input_dir):
 
 def test_a_piece_from_text(pack, nodes):
     loaded = nodes["LipServiceChoirFromText"].execute(text=json.dumps(piece())).result[0]
-    same(nodes["LipServiceChoir"].execute(**ask(pack, loaded=loaded)), lipservice.choir(piece()))
+    same(nodes["LipServiceChoir"].execute(**ask(pack, piece=loaded)), lipservice.choir(piece()))
 
 
 def test_refusals_come_through(pack, nodes):
@@ -130,10 +133,6 @@ def test_refusals_come_through(pack, nodes):
         nodes["LipServiceChoirFromText"].execute(text="{}")
     with pytest.raises(lipservice.Error, match="no voice"):
         nodes["LipServiceChoir"].execute(**ask(pack, voices="nobody"))
-
-
-HIGH = "%bpm 90\nsing C5:1\nwith B4:1\nme C5:2\n"
-LOW = "%bpm 90\nsing E4:1\nwith G4:1\nme E4:2\n"
 
 
 def duet(nodes, **kw):
@@ -149,7 +148,7 @@ def test_singers_typed_on_the_canvas(pack, nodes):
                "voices": ["cora", "ben"]}
     loaded = duet(nodes)
     assert loaded == written
-    out = nodes["LipServiceChoir"].execute(**ask(pack, loaded=loaded))
+    out = nodes["LipServiceChoir"].execute(**ask(pack, piece=loaded))
     same(out, lipservice.choir(written))
     assert [(p["name"], p["voice"]) for p in out.result[1]["parts"]] == [("High", "cora"), ("ben", "ben")]
 
@@ -174,7 +173,7 @@ def test_the_plain_piece_is_the_engine_s_own(pack, nodes):
     plain = {k: got[k][1]["default"] for k in ("glide", "dynamics", "breathiness", "breath", "diction", "motion", "pan")}
     loaded = nodes["LipServiceChoirFromSingers"].execute(singers=one, room="card", **plain).result[0]
     bare = {"choir": {"room": "card", "style": {k: plain[k] for k in ("glide", "dynamics", "breathiness")}, "parts": one}, "voices": ["cora"]}
-    same(nodes["LipServiceChoir"].execute(**ask(pack, loaded=loaded)), lipservice.choir(bare))
+    same(nodes["LipServiceChoir"].execute(**ask(pack, piece=loaded)), lipservice.choir(bare))
 
 
 def test_a_singer_does_not_change_the_wire_it_reads(nodes):
@@ -187,4 +186,4 @@ def test_a_song_the_engine_refuses(pack, nodes):
     one = nodes["LipServiceSinger"].execute(song="%bpm 90\namazing C5:1\n", voice="cora", name="High").result[0]
     loaded = nodes["LipServiceChoirFromSingers"].execute(singers=one, room="card", glide=9, dynamics=0.0, breathiness=1.0, breath=0.0, diction="", motion="none", pan=0.85).result[0]
     with pytest.raises(lipservice.Error, match="amazing: 3 syllables"):
-        nodes["LipServiceChoir"].execute(**ask(pack, loaded=loaded))
+        nodes["LipServiceChoir"].execute(**ask(pack, piece=loaded))
